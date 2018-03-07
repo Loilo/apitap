@@ -1,0 +1,53 @@
+{
+  "name": "apitap",
+  "version": "0.1.0",
+  "description": "Tacks custom extensions to existing JavaScript APIs",
+  "keywords": [
+    "api",
+    "proxy",
+    "wrap"
+  ],
+  "homepage": "https://github.com/Loilo/apitap#readme",
+  "bugs": {
+    "url": "https://github.com/Loilo/apitap/issues"
+  },
+  "license": "MIT",
+  "author": "Florian Reuschel <florian@loilo.de>",
+  "files": [
+    "src",
+    "dist"
+  ],
+  "main": "dist/node.cjs.js",
+  "module": "dist/node.esm.mjs",
+  "source": "src/index.js",
+  "browser": "dist/browser.min.js",
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Loilo/apitap.git"
+  },
+  "scripts": {
+    "build": "npm-run-all --parallel build:node:cjs build:node:esm build:browser build:browser:esm",
+    "build:browser": "rollup --config build/rollup.browser.js",
+    "build:browser:esm": "rollup --config build/rollup.browser.esm.js",
+    "build:node:cjs": "rollup --config build/rollup.node.cjs.js",
+    "build:node:esm": "rollup --config build/rollup.node.esm.js",
+    "prepublishOnly": "npm run build && npm test",
+    "test": "standard 'src/*.js' && jest"
+  },
+  "dependencies": {
+    "debug": "^3.1.0"
+  },
+  "devDependencies": {
+    "jest": "^22.4.2",
+    "npm-run-all": "^4.1.2",
+    "rollup": "^0.56.5",
+    "rollup-plugin-alias": "^1.4.0",
+    "rollup-plugin-uglify": "^3.0.0"
+  },
+  "engines" : {
+    "node" : ">=6.5.0"
+  }
+}
