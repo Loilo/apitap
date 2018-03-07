@@ -15,7 +15,8 @@
   "author": "Florian Reuschel <florian@loilo.de>",
   "files": [
     "src",
-    "dist"
+    "dist",
+    "README.md"
   ],
   "main": "dist/node.cjs.js",
   "module": "dist/node.esm.mjs",
