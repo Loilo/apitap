@@ -3,7 +3,7 @@
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 [![npm](https://img.shields.io/npm/v/apitap.svg)](https://npmjs.com/package/apitap)
 
-This tiny library (0.6kb minified & gzipped) tacks custom extensions on existing JavaScript functions and objects. That makes it incredibly easy to supplement existing JavaScript libraries with custom methods without changing the original vendor code.
+This tiny library (0.6kb minified & gzipped) tacks custom extensions onto existing JavaScript functions and objects. That makes it incredibly easy to supplement existing JavaScript libraries with custom methods without changing the original vendor code.
 
 It works by wrapping the target in a [Proxy](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Proxy). The Proxy sticks to the tapped library by attaching itself to properties or method calls you access on it.
 
@@ -76,7 +76,7 @@ Now that we have grabbed the `apitap` object, we can start injecting custom prop
 
 Since most of us probably know jQuery, let's take that as an example.
 
-Remember older jQuery versions? They had a `.size()` method that was removed in favor of the `.length` property.
+Remember older jQuery versions? They had a `size()` method that was removed in favor of the `length` property.
 
 Now let's re-implement that method:
 
@@ -92,7 +92,7 @@ $('div').size() // Returns some number
 
 There are two things to notice here:
 1. The `this` context points to the object the method it is called on – in our case that's the `$('div')` collection which holds the DOM elements.
-2. The `.size()` method is available although we're not calling it on the `$` object itself – the proxy reproduces itself and sticks to each property you access or method you call.
+2. The `size()` method is available although we're not calling it on the `$` object itself – the proxy reproduces itself and sticks to each property you access or method you call.
 
 ### Dynamic Injections
 The second point is a feature, but in our example it can be quite unhandy: In most cases, we want to inject our custom properties only under certain circumstances.

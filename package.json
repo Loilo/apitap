@@ -1,7 +1,7 @@
 {
   "name": "apitap",
-  "version": "0.1.1",
-  "description": "Tacks custom extensions to existing JavaScript APIs",
+  "version": "0.1.2",
+  "description": "Tacks custom extensions onto existing JavaScript APIs",
   "keywords": [
     "api",
     "proxy",
