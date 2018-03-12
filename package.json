@@ -1,6 +1,6 @@
 {
   "name": "apitap",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Tacks custom extensions onto existing JavaScript APIs",
   "keywords": [
     "api",

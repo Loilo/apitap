@@ -82,7 +82,7 @@ Remember older jQuery versions? They had a `size()` method that was removed in f
 Now let's re-implement that method:
 
 ```javascript
-const $ = apitap.wrap(window.jQuery, {
+const $ = apitap.wrap(jQuery, {
   size () {
     return this.length
   }
@@ -104,7 +104,7 @@ In the example above, the `size()` method is not only available on the `$('div')
 That's why we only want to provide the `size()` method on a jQuery collection. For that purpose, we can inject a function instead of an object. The function decides on a case-by-case basis which properties to provide:
 
 ```javascript
-const $ = apitap.wrap(window.jQuery, target => {
+const $ = apitap.wrap(jQuery, target => {
   // Only add the `size()` method on a jQuery collection
   if (target instanceof jQuery) {
     return {
@@ -128,9 +128,9 @@ Injected custom properties will shadow existing ones. In other words, custom pro
 You may provide getters in an injection object:
 
 ```javascript
-apitap.wrap(api, {
-  get prop () {
-    return // ...
+const $ = apitap.wrap(jQuery, {
+  get version () {
+    return jQuery.fn.jquery
   }
 })
 ```
@@ -139,20 +139,18 @@ apitap.wrap(api, {
 The ApiTap library exposes a `CATCH_ALL` symbol. You can use it in the injection object to answer every property access that was not matched otherwise:
 
 ```javascript
-const api = {}
-
-const wrappedApi = apitap.wrap(api, {
+const $ = apitap.wrap(jQuery, {
+  foo: 'bar',
   [apitap.CATCH_ALL] (name) {
-    return function () {
-      return `accessed ${name}`
-    }
+    return `no such property '${name}'`
   }
 })
 
-wrappedApi.foo() // "accessed foo"
+$.foo // "bar"
+$.baz // "no such property 'baz'"
 ```
 
-The function returned by the `CATCH_ALL` method will be called with the `api` object as the `this` context. Just like a regular injected method, the result will be wrapped if it's an object or a function.
+If the `CATCH_ALL` method returns a function, its context will be bound to the `jQuery` object. Just like in a regular injected method, the result will be wrapped if it's an object or a function.
 
 ### Unwrapping
 You can unwrap a tapped object with the `unwrap()` method:
