@@ -1,10 +1,14 @@
 import debug from 'debug';
 
-const log = (verbose, ...args) => {
-  if (verbose) debug('apitap')(...args);
-};
+const log = debug('apitap');
+
+/**
+ * Debugging log for Node.js
+ */
+var log$1 = (_, ...args) => log(...args)
 
 const PROXY_TARGET = Symbol('Proxy target marker');
+const CATCH_ALL = Symbol('Catch-all marker');
 
 /**
  * Checks if a given value is wrappable
@@ -13,6 +17,23 @@ const PROXY_TARGET = Symbol('Proxy target marker');
  */
 function isWrappable (value) {
   return (typeof value === 'object' || typeof value === 'function') && value !== null
+}
+
+/**
+ * Call a custom hook on a given injection object
+ * @param  {object} target       The original API object
+ * @param  {string|symbol} name  The property to call on the injection object
+ * @param  {object} injectObj    The injection object
+ * @return {any}                 The result of the call
+ */
+function getInjectedProperty (target, name, injectObj) {
+  const desc = Object.getOwnPropertyDescriptor(injectObj, name);
+
+  if (desc && typeof desc.get === 'function') {
+    return Reflect.apply(desc.get, target, [])
+  } else {
+    return Reflect.get(injectObj, name)
+  }
 }
 
 /**
@@ -25,11 +46,11 @@ function isWrappable (value) {
  */
 function wrapApi (api, inject, context, verbose) {
   // If target can't be or is already wrapped, act as an identity function
-  if (!isWrappable(api) || PROXY_TARGET in api) {
+  if (!isWrappable(api) || Reflect.has(api, PROXY_TARGET)) {
     return api
   }
 
-  log(verbose, 'wrap %o', api);
+  log$1(verbose, 'wrap %o', api);
 
   const proxy = new Proxy(api, {
     has (target, name) {
@@ -37,14 +58,14 @@ function wrapApi (api, inject, context, verbose) {
       return Reflect.has(target, name)
     },
     construct (target, args) {
-      log(verbose, 'construct %o with %o', target, args);
+      log$1(verbose, 'construct %o with %o', target, args);
 
       return wrapApi(Reflect.construct(target, args), inject, null, verbose)
     },
     get (target, name) {
       if (name === PROXY_TARGET) return target
 
-      log(verbose, 'get %o from %o', name, target);
+      log$1(verbose, 'get %o from %o', name, target);
 
       // If the injected object is a function, create the injection object from that
       const injectObj = (typeof inject === 'function'
@@ -52,25 +73,33 @@ function wrapApi (api, inject, context, verbose) {
         : inject) || Object.create(null);
 
       // Check if property is shadowed by injection
-      if (injectObj instanceof Object ? injectObj.hasOwnProperty(name) : name in injectObj) {
-        log(verbose, 'property %o shadowed by injected %o', name, injectObj);
+      const hasInjected = injectObj instanceof Object
+        ? injectObj.hasOwnProperty(name)
+        : name in injectObj;
 
-        const desc = Object.getOwnPropertyDescriptor(injectObj, name);
+      // Found property in the injection object
+      if (hasInjected) {
+        log$1(verbose, 'property %o shadowed by injected %o', name, injectObj);
 
-        let result;
-        if (desc && typeof desc.get === 'function') {
-          result = desc.get.call(target);
-        } else {
-          result = injectObj[name];
-        }
+        const injectedProperty = getInjectedProperty(target, name, injectObj);
 
-        return wrapApi(result, inject, typeof result === 'function' ? target : null, verbose)
-      } else {
+        return wrapApi(injectedProperty, inject, typeof injectedProperty === 'function' ? target : null, verbose)
+
+      // Found property in the original API
+      } else if (Reflect.has(target, name)) {
         return wrapApi(Reflect.get(target, name), inject, null, verbose)
+
+      // Didn't find property but have CATCH_ALL
+      } else if (injectObj instanceof Object && Reflect.has(injectObj, CATCH_ALL)) {
+        log$1(verbose, 'property %o caught by CATCH_ALL', name);
+
+        const catchAll = Reflect.apply(Reflect.get(injectObj, CATCH_ALL), target, [ name ]);
+
+        return wrapApi(catchAll, inject, target, verbose)
       }
     },
     apply (target, thisArg, args) {
-      log(verbose, 'call %o with %o as %o', target, args, unwrap(thisArg));
+      log$1(verbose, 'call %o with %o as %o', target, args, unwrap(thisArg));
 
       return wrapApi(Reflect.apply(target, unwrap(thisArg), args), inject, null, verbose)
     }
@@ -114,4 +143,4 @@ function isWrapped (value) {
   return isWrappable(value) && PROXY_TARGET in value
 }
 
-export { wrap, unwrap, isWrapped };
+export { CATCH_ALL, wrap, unwrap, isWrapped };

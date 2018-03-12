@@ -10,7 +10,7 @@ export default {
   },
   plugins: [
     alias({
-      debug: './browser-log.js'
+      '@debugger': './log.browser.js'
     }),
     uglify()
   ]

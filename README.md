@@ -1,4 +1,4 @@
-# API Tap
+# ApiTap
 
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 [![npm](https://img.shields.io/npm/v/apitap.svg)](https://npmjs.com/package/apitap)
@@ -12,14 +12,15 @@ This package works in Node.js and in the browser. Note however that the browser 
 ---
 
 * [Installation](#installation)
-  * [Include in the browser](#include-in-the-browser)
+  * [Include in the Browser](#include-in-the-browser)
   * [Include in Node.js](#include-in-nodejs)
 * [Usage](#usage)
   * [Dynamic Injections](#dynamic-injections)
   * [Naming Conflicts](#naming-conflicts)
   * [Inject Getters](#inject-getters)
+  * [Catch Unknown Properties](#catch-unknown-properties)
   * [Unwrapping](#unwrapping)
-  * [Checking If Object Is Wrapped](#checking-if-object-is-wrapped)
+  * [Checking if Object is Wrapped](#checking-if-object-is-wrapped)
   * [Debugging](#debugging)
 
 ---
@@ -31,7 +32,7 @@ Install it from npm:
 npm install --save apitap
 ```
 
-### Include in the browser
+### Include in the Browser
 You can use this package in your browser with one of the following snippets:
 
 * The most common version. Introduces a global `apitap` variable, runs in all modern browsers:
@@ -90,9 +91,10 @@ const $ = apitap.wrap(window.jQuery, {
 $('div').size() // Returns some number
 ```
 
-There are two things to notice here:
+There are some things to notice here:
 1. The `this` context points to the object the method it is called on – in our case that's the `$('div')` collection which holds the DOM elements.
 2. The `size()` method is available although we're not calling it on the `$` object itself – the proxy reproduces itself and sticks to each property you access or method you call.
+3. We return a number from the `size()` method. However, if we returned an object or a function, the return value would be wrapped.
 
 ### Dynamic Injections
 The second point is a feature, but in our example it can be quite unhandy: In most cases, we want to inject our custom properties only under certain circumstances.
@@ -124,6 +126,7 @@ Injected custom properties will shadow existing ones. In other words, custom pro
 
 ### Inject Getters
 You may provide getters in an injection object:
+
 ```javascript
 apitap.wrap(api, {
   get prop () {
@@ -131,6 +134,25 @@ apitap.wrap(api, {
   }
 })
 ```
+
+### Catch Unknown Properties
+The ApiTap library exposes a `CATCH_ALL` symbol. You can use it in the injection object to answer every property access that was not matched otherwise:
+
+```javascript
+const api = {}
+
+const wrappedApi = apitap.wrap(api, {
+  [apitap.CATCH_ALL] (name) {
+    return function () {
+      return `accessed ${name}`
+    }
+  }
+})
+
+wrappedApi.foo() // "accessed foo"
+```
+
+The function returned by the `CATCH_ALL` method will be called with the `api` object as the `this` context. Just like a regular injected method, the result will be wrapped if it's an object or a function.
 
 ### Unwrapping
 You can unwrap a tapped object with the `unwrap()` method:
@@ -141,10 +163,10 @@ apitap.unwrap($) // Returns the vanilla jQuery object
 
 Note that both the `wrap()` and the `unwrap()` methods are idempotent. That means you can't wrap/unwrap an object more than once. Wrapping an already wrapped object will do nothing, just like unwrapping a non-wrapped object won't do anything.
 
-### Checking If Object Is Wrapped
+### Checking if Object is Wrapped
 You can check if an object is wrapped via this library by running `apitap.isWrapped(object)`.
 
 ### Debugging
-The Node.js version of apitap uses the [debug](https://npmjs.com/package/debug) utility to print logs.
+The Node.js version of ApiTap uses the [debug](https://npmjs.com/package/debug) utility to print logs.
 
 The browser build uses just a simple `console.log()`. It also has to be enabled manually by setting the `verbose` parameter (3rd parameter of `apitap.wrap()`) to `true`.

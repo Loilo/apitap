@@ -1,4 +1,4 @@
-const { wrap, unwrap, isWrapped } = require('../dist/node.cjs')
+const { wrap, unwrap, isWrapped, CATCH_ALL } = require('../dist/node.cjs')
 
 const api = {
   foo () {
@@ -15,6 +15,18 @@ test('injects additional properties', () => {
 
   expect(wrappedApi.foo()).toBe('bar')
   expect(wrappedApi.bar()).toBe('baz')
+})
+
+test('uses CATCH_ALL (only) if property is not available', () => {
+  const wrappedApi = wrap(api, {
+    [CATCH_ALL] (name) {
+      return () => [ name, this ]
+    }
+  })
+
+  expect(wrappedApi.foo()).toBe('bar')
+  expect(wrappedApi.bar()[0]).toBe('bar')
+  expect(unwrap(wrappedApi.bar()[1])).toBe(api)
 })
 
 test('shadows existing properties', () => {
