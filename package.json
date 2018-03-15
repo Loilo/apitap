@@ -1,6 +1,6 @@
 {
   "name": "apitap",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Tacks custom extensions onto existing JavaScript APIs",
   "keywords": [
     "api",
@@ -48,7 +48,7 @@
     "rollup-plugin-alias": "^1.4.0",
     "rollup-plugin-uglify": "^3.0.0"
   },
-  "engines" : {
-    "node" : ">=6.5.0"
+  "engines": {
+    "node": ">=6.5.0"
   }
 }
