@@ -1,7 +1,8 @@
 # ApiTap
 
-[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
-[![npm](https://img.shields.io/npm/v/apitap.svg)](https://npmjs.com/package/apitap)
+> The functionality of this package has been moved to the [tapsig](https://www.npmjs.com/package/tapsig) package. This package has in turn been deprecated.
+
+---
 
 This tiny library (0.6kb minified & gzipped) tacks custom extensions onto existing JavaScript functions and objects. That makes it incredibly easy to supplement existing JavaScript libraries with custom methods without changing the original vendor code.
 
